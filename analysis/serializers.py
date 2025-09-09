@@ -16,9 +16,32 @@ class ImageResultSerializer(serializers.ModelSerializer):
         return None
 
 class RecommendationSerializer(serializers.ModelSerializer):
+    structured_data = serializers.SerializerMethodField()
+    text = serializers.SerializerMethodField()
+    
     class Meta:
         model = Recommendation
-        fields = ['id', 'generated_by', 'content', 'status', 'admin_feedback', 'created_at', 'updated_at']
+        fields = ['id', 'generated_by', 'content', 'text', 'structured_data', 'status', 'admin_feedback', 'created_at', 'updated_at']
+    
+    def get_text(self, obj):
+        """Extract the plain text part of the content"""
+        if "--- STRUCTURED_DATA ---" in obj.content:
+            parts = obj.content.split("--- STRUCTURED_DATA ---")
+            return parts[0].strip()
+        return obj.content
+    
+    def get_structured_data(self, obj):
+        """Extract structured data from content if it exists"""
+        if "--- STRUCTURED_DATA ---" in obj.content:
+            try:
+                import json
+                parts = obj.content.split("--- STRUCTURED_DATA ---")
+                if len(parts) > 1:
+                    json_str = parts[1].strip()
+                    return json.loads(json_str)
+            except (json.JSONDecodeError, IndexError):
+                pass
+        return None
 
 class AnalysisSerializer(serializers.ModelSerializer):
     results = ImageResultSerializer(many=True, read_only=True)

@@ -102,17 +102,28 @@ def upload_analysis(request):
         diseases = [p['disease'] for p in predictions]
         primary_disease = max(set(diseases), key=diseases.count)
         
-        recommendation_text = gemini_service.generate_recommendation(
+        recommendation_data = gemini_service.generate_recommendation(
             crop_type=crop_type,
             disease=primary_disease,
             severity=avg_severity,
             confidence=avg_confidence
         )
         
+        # Handle both string and JSON responses
+        if isinstance(recommendation_data, dict):
+            # Store JSON as content and extract text summary
+            import json
+            recommendation_text = recommendation_data.get('summary', 'AI recommendation generated')
+            # Store the structured data as JSON string in content for now
+            full_content = f"{recommendation_text}\n\n--- STRUCTURED_DATA ---\n{json.dumps(recommendation_data, indent=2)}"
+        else:
+            # Fallback for string responses
+            full_content = str(recommendation_data)
+        
         recommendation = Recommendation.objects.create(
             analysis=analysis,
             generated_by='ai',
-            content=recommendation_text,
+            content=full_content,
             status='pending'
         )
         
@@ -420,17 +431,25 @@ def request_recommendation(request):
             severity = analysis.average_severity
         
         # Generate AI recommendation using Gemini
-        recommendation_text = gemini_service.generate_recommendation(
+        recommendation_data = gemini_service.generate_recommendation(
             crop_type=analysis.crop_type,
             disease=disease,
             severity=severity,
             confidence=analysis.average_confidence
         )
         
+        # Handle both string and JSON responses
+        if isinstance(recommendation_data, dict):
+            import json
+            recommendation_text = recommendation_data.get('summary', 'AI recommendation generated')
+            full_content = f"{recommendation_text}\n\n--- STRUCTURED_DATA ---\n{json.dumps(recommendation_data, indent=2)}"
+        else:
+            full_content = str(recommendation_data)
+        
         # Create recommendation
         recommendation = Recommendation.objects.create(
             analysis=analysis,
-            content=recommendation_text,
+            content=full_content,
             generated_by='AI',
             status='pending'
         )
