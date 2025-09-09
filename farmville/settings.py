@@ -95,8 +95,20 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://farmville.ballotbase.online,http://ballotbase.online', cast=lambda v: [s.strip() for s in v.split(',')])
+# Allow both HTTP (local dev) and HTTPS (production) origins for the frontend
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,https://farmville.ballotbase.online,https://ballotbase.online',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF trusted origins must include scheme for Django 4+
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='https://farmville.ballotbase.online,https://ballotbase.online',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 
 # Celery
 CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
