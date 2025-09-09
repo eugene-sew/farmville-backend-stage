@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  farmville-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data          # SQLite database persistence
+      - ./media:/app/media        # Media files persistence
+      - ./static:/app/static      # Static files
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - DATABASE_URL=sqlite:///data/farmville.db
+      - MEDIA_ROOT=/app/media
+      - STATIC_ROOT=/app/static
+      - TF_MODEL_PATH=models/plantdisease_savedmodel
+      - GEMINI_API_KEY=your-gemini-api-key-here
+      - CORS_ALLOW_ALL_ORIGINS=True
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

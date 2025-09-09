@@ -1,0 +1,3 @@
+models/plantdisease_savedmodel filter=lfs diff=lfs merge=lfs -text
+models/** filter=lfs diff=lfs merge=lfs -text
+models/plantdisease_savedmodel/variables/variables.data-00000-of-00001 filter=lfs diff=lfs merge=lfs -text
