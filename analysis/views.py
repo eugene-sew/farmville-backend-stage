@@ -13,8 +13,8 @@ from .serializers import (
     AnalysisSerializer, AnalysisCreateSerializer, 
     AdminReviewSerializer, RecommendationSerializer
 )
-from .ml_service import disease_detection_service
-from .gemini_service import gemini_service
+# from .ml_service import disease_detection_service
+# from .gemini_service import gemini_service
 
 logger = logging.getLogger(__name__)
 
