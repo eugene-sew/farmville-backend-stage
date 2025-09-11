@@ -28,8 +28,8 @@ venv.bak/
 Thumbs.db
 
 # Large model files - use Git LFS or download separately
-models/plantdisease_savedmodel/variables/variables.data-00000-of-00001
-models/
+# models/plantdisease_savedmodel/variables/variables.data-00000-of-00001
+# models/
 # Celery
 celerybeat-schedule
 celerybeat.pid

@@ -98,7 +98,7 @@ SPECTACULAR_SETTINGS = {
 # Allow both HTTP (local dev) and HTTPS (production) origins for the frontend
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,https://farmville.ballotbase.online,https://ballotbase.online',
+    default='http://localhost:3000,https://farmville.ballotbase.online,https://ballotbase.online,https://farmvapi.onehiveafrica.com,https://onehiveafrica.com',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 CORS_ALLOW_CREDENTIALS = True
@@ -106,7 +106,7 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF trusted origins must include scheme for Django 4+
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='https://farmville.ballotbase.online,https://ballotbase.online',
+    default='https://farmville.ballotbase.online,https://ballotbase.online,https://farmvapi.onehiveafrica.com,https://onehiveafrica.com',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
