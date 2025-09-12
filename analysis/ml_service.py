@@ -31,10 +31,20 @@ class DiseaseDetectionService:
         try:
             model_path = settings.TF_MODEL_PATH
             if os.path.exists(model_path):
-                self.model = tf.saved_model.load(model_path)
-                self.predict_fn = self.model.signatures['serving_default']
-                logger.info(f"✅ Model loaded successfully from {model_path}")
-                logger.info(f"Available signatures: {list(self.model.signatures.keys())}")
+                # Try loading .keras model with custom_objects to handle compatibility issues
+                try:
+                    self.model = tf.keras.models.load_model(model_path, compile=False)
+                    logger.info(f"✅ Keras model loaded successfully from {model_path}")
+                    logger.info(f"Model input shape: {self.model.input_shape}")
+                    logger.info(f"Model output shape: {self.model.output_shape}")
+                except Exception as keras_error:
+                    logger.warning(f"⚠️  Failed to load as .keras model: {keras_error}")
+                    # Fallback: try loading as SavedModel if .keras fails
+                    logger.info("🔄 Attempting to load as SavedModel format...")
+                    self.model = tf.saved_model.load(model_path)
+                    self.predict_fn = self.model.signatures['serving_default']
+                    logger.info(f"✅ SavedModel loaded successfully from {model_path}")
+                    logger.info(f"Available signatures: {list(self.model.signatures.keys())}")
             else:
                 logger.warning(f"❌ Model not found at {model_path}. Using mock predictions.")
         except Exception as e:
@@ -115,20 +125,26 @@ class DiseaseDetectionService:
         for image_file in image_files:
             try:
                 if self.model:
-                    # Real TensorFlow prediction using saved_model
+                    # Real TensorFlow prediction - handle both .keras and SavedModel formats
                     processed_image = self.preprocess_image(image_file)
-                    input_tensor = tf.convert_to_tensor(processed_image, dtype=tf.float32)
-                    predictions = self.predict_fn(input_tensor)
                     
-                    # Get the output (assuming single output)
-                    output_key = list(predictions.keys())[0]
-                    pred_array = predictions[output_key].numpy()
+                    # Check if this is a Keras model or SavedModel
+                    if hasattr(self.model, 'predict'):
+                        # Keras model
+                        predictions = self.model.predict(processed_image, verbose=0)
+                        pred_array = predictions[0]
+                    else:
+                        # SavedModel format
+                        input_tensor = tf.convert_to_tensor(processed_image, dtype=tf.float32)
+                        predictions = self.predict_fn(input_tensor)
+                        output_key = list(predictions.keys())[0]
+                        pred_array = predictions[output_key].numpy()[0]
                     
-                    predicted_class_idx = np.argmax(pred_array[0])
-                    confidence = float(pred_array[0][predicted_class_idx])
+                    predicted_class_idx = np.argmax(pred_array)
+                    confidence = float(pred_array[predicted_class_idx])
                     
                     # Validate if this looks like a plant image
-                    if not self._is_likely_plant_image(confidence, predicted_class_idx, pred_array[0]):
+                    if not self._is_likely_plant_image(confidence, predicted_class_idx, pred_array):
                         results.append({
                             'image_name': image_file.name,
                             'crop_type': 'Unknown',

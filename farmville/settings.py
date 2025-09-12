@@ -115,7 +115,7 @@ CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/0')
 
 # ML Model Settings
-TF_MODEL_PATH = config('TF_MODEL_PATH', default='models/plantdisease_savedmodel')
+TF_MODEL_PATH = config('TF_MODEL_PATH', default='models/plantdisease_model_mn.keras')
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='AIzaSyBolxV9MsOG3hG7iTznN2lto1T3oOjxhgI')
 
 # File Upload Settings
