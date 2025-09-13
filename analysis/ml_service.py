@@ -20,7 +20,7 @@ class DiseaseDetectionService:
         try:
             # Load Teachable Machine model
             model_dir = "models/converted_keras"
-            model_path = os.path.join(model_dir, "keras_Model.h5")
+            model_path = os.path.join(model_dir, "keras_model.h5")
             labels_path = os.path.join(model_dir, "labels.txt")
             
             if os.path.exists(model_path):
